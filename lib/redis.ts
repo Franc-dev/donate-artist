@@ -1,8 +1,8 @@
 import { Redis } from '@upstash/redis'
 
 const redis = new Redis({
-  url: 'https://boss-jennet-34531.upstash.io',
-  token: 'AYbjAAIjcDFlYmQ2YWQ3ZDljYjE0OWYzODVkMjUwYTIwMjI2YmM4OXAxMA',
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 })
 
 export default redis 
