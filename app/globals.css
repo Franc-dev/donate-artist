@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 248 250 252;
+    --foreground: 15 23 42;
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
+    --popover: 255 255 255;
+    --popover-foreground: 15 23 42;
+    --primary: 99 102 241;
+    --primary-foreground: 248 250 252;
+    --secondary: 241 245 249;
+    --secondary-foreground: 15 23 42;
+    --muted: 241 245 249;
+    --muted-foreground: 100 116 139;
+    --accent: 241 245 249;
+    --accent-foreground: 15 23 42;
+    --destructive: 239 68 68;
+    --destructive-foreground: 248 250 252;
+    --border: 226 232 240;
+    --input: 226 232 240;
+    --ring: 99 102 241;
+    --radius: 0.5rem;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-indigo-600 text-white font-medium px-6 py-3 transition-all duration-200 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-200 text-slate-700 font-medium px-6 py-3 transition-all duration-200 hover:bg-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2;
+  }
+
+  .card-subtle {
+    @apply bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+
+  .vote-button {
+    @apply flex items-center justify-center space-x-2 px-4 py-2 font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .vote-button-up {
+    @apply bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 focus:ring-emerald-500;
+  }
+
+  .vote-button-down {
+    @apply bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 focus:ring-red-500;
+  }
+
+  .vote-button-active-up {
+    @apply bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700;
+  }
+
+  .vote-button-active-down {
+    @apply bg-red-600 text-white border-red-600 hover:bg-red-700;
+  }
+}
+
+.font-playfair {
+  font-family: var(--font-playfair);
+}
+
+.font-poppins {
+  font-family: var(--font-poppins);
+}
