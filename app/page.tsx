@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Trophy, Clock, Users } from "lucide-react"
 import ArtistComparison from "@/components/artist-comparison"
 import DonationModal from "@/components/donation-modal"
+import ClearDataButton from "@/components/clear-data-button"
 import IntroModal from "@/components/intro-modal"
 import { useAppStore } from "@/stores/app-store"
 import type { Artist } from "@/types"
@@ -18,7 +19,8 @@ export default function HomePage() {
     showIntroModal, 
     setShowIntroModal,
     loadArtists,
-    loadCurrentBattle 
+    loadCurrentBattle,
+    syncRedisData
   } = useAppStore()
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -38,6 +40,15 @@ export default function HomePage() {
 
     initializeData()
   }, [loadArtists, loadCurrentBattle])
+
+  // Sync Redis data every 5 seconds for real-time updates
+  useEffect(() => {
+    const syncInterval = setInterval(() => {
+      syncRedisData()
+    }, 5000)
+
+    return () => clearInterval(syncInterval)
+  }, [syncRedisData])
 
   const handleDonate = (artist: Artist) => {
     if (!currentUser) {

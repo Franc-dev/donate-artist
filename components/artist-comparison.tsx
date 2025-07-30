@@ -13,7 +13,7 @@ interface ArtistComparisonProps {
 }
 
 export default function ArtistComparison({ artist1, artist2, onDonate }: ArtistComparisonProps) {
-  const { currentUser, setCurrentUser, addVote, getUserVoteForArtist, updateArtistVotes } = useAppStore()
+  const { currentUser, setCurrentUser, addVote, getUserVoteForArtist, updateArtistVotes, addVoteRedis, updateArtistVotesRedis } = useAppStore()
   const [votingArtist, setVotingArtist] = useState<string | null>(null)
 
   const handleVote = async (artistId: string, voteType: "upvote" | "downvote") => {
@@ -67,6 +67,11 @@ export default function ArtistComparison({ artist1, artist2, onDonate }: ArtistC
         timestamp: new Date().toISOString(),
       }
 
+      // Use Redis for real-time voting
+      await addVoteRedis(vote)
+      await updateArtistVotesRedis(artistId, voteType === "upvote" ? 1 : -1)
+
+      // Also update local state for immediate UI feedback
       addVote(vote)
       updateArtistVotes(artistId, voteType === "upvote" ? 1 : -1)
 

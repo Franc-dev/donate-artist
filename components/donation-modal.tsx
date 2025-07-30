@@ -19,7 +19,7 @@ interface DonationModalProps {
 const payHero = new PayHeroService(PayHeroConfig)
 
 export default function DonationModal({ artist, isOpen, onClose }: DonationModalProps) {
-  const { addDonation, currentUser, setCurrentUser, updateArtistDonations } = useAppStore()
+  const { addDonation, currentUser, setCurrentUser, updateArtistDonations, addDonationRedis, updateArtistDonationsRedis } = useAppStore()
   const [amount, setAmount] = useState("")
   const [donorName, setDonorName] = useState(currentUser?.name || "")
   const [donorEmail, setDonorEmail] = useState(currentUser?.email || "")
@@ -298,11 +298,17 @@ export default function DonationModal({ artist, isOpen, onClose }: DonationModal
       {/* Payment Status Modal */}
       <PaymentStatusModal
         isOpen={showPaymentStatus}
-        onClose={(paymentSucceeded: boolean = false) => {
+        onClose={async (paymentSucceeded: boolean = false) => {
           setShowPaymentStatus(false)
           // Only record donation if payment actually succeeded
           if (paymentSucceeded && artist && currentDonation) {
             currentDonation.status = "completed"
+            
+            // Use Redis for real-time donations
+            await addDonationRedis(currentDonation)
+            await updateArtistDonationsRedis(artist.id, Number.parseFloat(amount))
+            
+            // Also update local state for immediate UI feedback
             addDonation(currentDonation)
             updateArtistDonations(artist.id, Number.parseFloat(amount))
             onClose()

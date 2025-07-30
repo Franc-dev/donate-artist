@@ -74,87 +74,50 @@ export default function PaymentStatusModal({
       clearTimeout(timeoutRef.current)
       timeoutRef.current = null
     }
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-      eventSourceRef.current = null
-    }
   }
 
   const startRealTimePaymentTracking = () => {
     if (!externalReference) {
-      console.log("⚠️ No external reference, using fallback")
-      // Fallback for demo - in production this should always have a reference
-      timeoutRef.current = setTimeout(() => {
-        const isSuccess = Math.random() > 0.3
-        setStatus(isSuccess ? "success" : "failed")
-        setMessage(isSuccess ? "Payment completed successfully!" : "Payment failed. Please try again.")
-      }, 3000) // Much shorter for demo
+      console.log("❌ No external reference provided")
+      setStatus("failed")
+      setMessage("Payment reference missing")
       return
     }
 
-    console.log("🔄 Starting real-time payment tracking for:", externalReference)
+    console.log("🔄 Starting real payment tracking for:", externalReference)
     
-    // Method 1: Server-Sent Events for real-time updates
-    try {
-      const eventSource = new EventSource(`/api/payments/status-stream?reference=${externalReference}`)
-      eventSourceRef.current = eventSource
-
-      eventSource.onmessage = (event) => {
-        const data = JSON.parse(event.data)
-        console.log("📡 Real-time update received:", data)
-        
-        if (data.status === "completed") {
-          setStatus("success")
-          setMessage("Payment completed successfully!")
-          cleanup()
-        } else if (data.status === "failed" || data.status === "cancelled") {
-          setStatus(data.status)
-          setMessage(data.message || "Payment failed")
-          cleanup()
-        }
-      }
-
-      eventSource.onerror = (error) => {
-        console.error("❌ EventSource error:", error)
-        // Fallback to polling if SSE fails
-        startFallbackPolling()
-      }
-    } catch (error) {
-      console.error("❌ EventSource not supported, using fallback")
-      startFallbackPolling()
-    }
-  }
-
-  const startFallbackPolling = () => {
-    // Efficient polling - only if webhooks fail
-    console.log("🔄 Using fallback polling for:", externalReference)
-    
-    const pollInterval = setInterval(async () => {
+    // REAL PAYMENT TRACKING - Check actual PayHero status
+    const checkPaymentStatus = async () => {
       try {
-        const response = await fetch(`/api/payments/check-status?reference=${externalReference}`)
+        const response = await fetch(`/api/payments/check-real-status?reference=${externalReference}`)
         const data = await response.json()
         
+        console.log("🔍 Real payment status check:", data)
+        
         if (data.status === "completed") {
           setStatus("success")
           setMessage("Payment completed successfully!")
-          clearInterval(pollInterval)
           cleanup()
         } else if (data.status === "failed" || data.status === "cancelled") {
           setStatus(data.status)
           setMessage(data.message || "Payment failed")
-          clearInterval(pollInterval)
           cleanup()
+        } else if (data.status === "pending") {
+          // Continue checking if still pending
+          setTimeout(checkPaymentStatus, 2000)
         }
       } catch (error) {
-        console.error("❌ Polling error:", error)
+        console.error("❌ Payment status check failed:", error)
+        // Continue checking on error
+        setTimeout(checkPaymentStatus, 3000)
       }
-    }, 2000) // Poll every 2 seconds as fallback
+    }
 
-    // Store interval for cleanup
-    timeoutRef.current = setTimeout(() => {
-      clearInterval(pollInterval)
-    }, 60000) // Stop polling after 60 seconds
+    // Start checking immediately
+    checkPaymentStatus()
   }
+
+
 
   const handleCancel = () => {
     setStatus("cancelled")
